@@ -1,0 +1,3 @@
+- every file in the backend/app/api folder creates their own router , and this routers are combined together at one place main.py so that it acrs as a single application backeend at the end.
+- same layered architecture as the rest of your backend: API → Controller → Service → Database → Controller → Response.
+- In FastAPI, the core difference lies in their operational layer: Models (typically SQLAlchemy or SQLModel) manage how data is stored in your database, while Schemas (Pydantic models) manage how data enters, leaves, and is validated by your API
