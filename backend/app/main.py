@@ -37,7 +37,9 @@ app = FastAPI(
 # Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware, # CORS (Cross-Origin Resource Sharing) allows your frontend to call your backend.
-    allow_origins=["*"],  # Adjust in production to frontend origins
+    allow_origins=[
+        "http://localhost:5173",   # React frontend
+    ],  # Adjust in production to frontend origins
     # check->
     allow_credentials=True, # Allows cookies and authentication credentials to be sent.
     allow_methods=["*"],
