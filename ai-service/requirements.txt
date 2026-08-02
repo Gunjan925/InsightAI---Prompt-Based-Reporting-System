@@ -1,0 +1,15 @@
+fastapi==0.115.0 # to build REST APIs
+uvicorn==0.30.1 # ASGI server used to run the FastAPI application
+pydantic==2.9.2 # Validates API request and response data using Python models
+pydantic-settings==2.5.2 # Loads application settings from .env using Pydantic
+numpy==1.26.4 
+pandas==2.2.3
+openpyxl==3.1.5 # Reads and writes Excel (.xlsx) files. Used when users upload Excel datasets instead of CSVs.
+plotly==6.3.0 # Creates interactive charts (bar, line, pie, scatter, histogram, heatmap, etc.) for the dashboard and reports.
+chromadb==1.0.20 # Local vector database used to store embeddings and perform semantic similarity search for the RAG pipeline.
+sentence-transformers==5.1.0 # Generates vector embeddings from dataset text using pre-trained embedding models (e.g., all-MiniLM-L6-v2).
+google-generativeai==0.8.5 # Official Google SDK used to communicate with Gemini models through the Gemini API.
+jinja2==3.1.6 # HTML templating engine used to dynamically generate report layouts before converting them to PDF or serving them as HTML.
+reportlab==4.4.3 # Generates professional PDF reports programmatically from AI insights, statistics, and charts.
+python-multipart==0.0.9 # Required for handling multipart/form-data requests (file uploads)
+httpx==0.27.2 # Sends HTTP requests to external APIs (used to communicate with the AI service)
