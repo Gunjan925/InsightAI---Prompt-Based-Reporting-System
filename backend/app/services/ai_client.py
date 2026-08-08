@@ -63,3 +63,50 @@ class AiClient:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error contacting AI Service: {str(e)}"
             )
+
+    @staticmethod
+    async def generate_dashboard_from_ai_service(
+        filename: str,
+        file_content: bytes,
+        mime_type: str
+    ) -> dict:
+        """
+        Forwards the dataset binary to the AI Service's /api/dashboard endpoint.
+        The AI Service reads, cleans, and statistically profiles the dataset, then recommends and generates Plotly charts — all WITHOUT calling any LLM.
+        Returns: { dataset_id, row_count, col_count, columns, charts }
+        """
+        url = f"{settings.AI_SERVICE_URL.rstrip('/')}/api/dashboard"
+        logger.info(f"Forwarding dashboard generation request to AI Service at: {url}")
+
+        # Send file as multipart/form-data — no prompt needed for dashboard
+        files = {
+            "file": (filename, file_content, mime_type)
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                response = await client.post(url, files=files)
+
+            if response.status_code != 200:
+                logger.error(f"AI Service dashboard error: {response.status_code} - {response.text}")
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=f"AI Service dashboard error: {response.text}"
+                )
+
+            dashboard_data = response.json()
+            logger.info("Successfully received dashboard data from AI Service.")
+            return dashboard_data
+
+        except httpx.ConnectError as ce:
+            logger.error(f"Could not connect to AI Service for dashboard at {url}: {ce}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Connection to AI Service failed. Please ensure the AI service is online and running."
+            )
+        except Exception as e:
+            logger.error(f"Unhandled error during AI service dashboard API call: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error contacting AI Service for dashboard: {str(e)}"
+            )

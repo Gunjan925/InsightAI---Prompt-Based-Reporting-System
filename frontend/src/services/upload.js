@@ -31,3 +31,10 @@ export async function uploadDataset(file, onProgress) {
   })
   return res.data
 }
+
+// Fetch all datasets previously uploaded by the user
+// Returns: UploadResponse[]
+export async function getUploadedDatasets() {
+  const res = await api.get('/upload')
+  return res.data
+}

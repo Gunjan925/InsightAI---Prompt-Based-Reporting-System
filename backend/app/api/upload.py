@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, UploadFile, File, status
 from sqlalchemy.orm import Session
+from typing import List
 from app.config.database import get_db
 from app.schemas.upload_schema import UploadResponse
 from app.controllers.upload_controller import UploadController
 from app.middlewares.auth import get_current_user
 from app.models.user import User
+from app.models.uploaded_file import UploadedFile
 
 # Creates a group of related API endpoints. Adds /upload before every endpoint (/upload). Groups these APIs under Dataset Upload in Swagger UI.
 # Swagger UI is an automatically generated interactive webpage that documents all your FastAPI APIs. It lets you view, test, and understand your endpoints without using tools like Postman. Swagger UI: http://127.0.0.1:8000/docs — Interactive documentation where you can test APIs.
@@ -73,3 +75,11 @@ Store in Database
 
 Return UploadResponse
 '''
+
+@router.get("", response_model=List[UploadResponse], status_code=status.HTTP_200_OK)
+def get_user_datasets(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Retrieve a list of all datasets previously uploaded by the authenticated user.
+    """
+    files = db.query(UploadedFile).filter(UploadedFile.user_id == current_user.id).order_by(UploadedFile.created_at.desc()).all()
+    return files

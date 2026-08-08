@@ -2,7 +2,8 @@
 // Provides functions to interact with the report-related FastAPI endpoints.
 //
 // Endpoints used:
-//   POST /api/report/generate          → Trigger AI report generation
+//   POST /api/dashboard/generate       → Phase 1: instant non-LLM charts from dataset
+//   POST /api/report/generate          → Phase 2: trigger AI (Gemini) report generation
 //   GET  /api/report/{id}              → Fetch a specific report
 //   GET  /api/report/{id}/download     → Download report as HTML file
 //   GET  /api/history                  → List all reports for the current user
@@ -10,7 +11,16 @@
 
 import api from './api'
 
-// Send a report generation request to the AI pipeline.
+// Phase 1 — Generate instant dataset dashboard (no LLM, no prompt).
+// file_id: number  – ID returned by uploadDataset()
+// Returns: { dataset_id, row_count, col_count, columns, charts[] }
+// Each chart has: { type, title, description, x?, y?, category?, plotly_json }
+export async function generateDashboard(fileId) {
+  const res = await api.post('/dashboard/generate', { file_id: fileId })
+  return res.data
+}
+
+// Phase 2 — Send a report generation request to the AI pipeline (uses Gemini LLM).
 // file_id: number  – ID returned by uploadDataset()
 // prompt:  string  – Natural language analysis instruction
 // Returns: ReportResponse { id, user_id, file_id, prompt, report_title, summary, content, created_at }
