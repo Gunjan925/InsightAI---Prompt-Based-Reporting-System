@@ -6,6 +6,7 @@ from app.schemas.response_schema import ReportResponse
 # Setup router for report generation endpoints
 router = APIRouter(tags=["Reports"])
 
+# Function to generate the report
 @router.post("/api/generate", response_model=ReportResponse, status_code=status.HTTP_200_OK)
 async def generate_report(
     file: UploadFile = File(...),

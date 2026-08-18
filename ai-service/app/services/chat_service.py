@@ -60,7 +60,7 @@ class ChatService:
                     """
 
             # 5. Execute Gemini LLM call
-            response_text = await call_gemini(prompt, model_name="gemini-1.5-flash", temperature=0.1)
+            response_text = await call_gemini(prompt, model_name="gemini-3.6-flash", temperature=0.1)
 
             return {
                 "response": response_text,

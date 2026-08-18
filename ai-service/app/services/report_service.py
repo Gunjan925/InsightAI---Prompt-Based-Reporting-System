@@ -63,7 +63,7 @@ class ReportService:
             # Use lower temperature (0.15) to maintain professional grounded outputs
             raw_ai_analysis = await call_gemini(
                 prompt=llm_prompt,
-                model_name="gemini-1.5-flash",
+                model_name="gemini-3.6-flash",
                 temperature=0.15
             )
 

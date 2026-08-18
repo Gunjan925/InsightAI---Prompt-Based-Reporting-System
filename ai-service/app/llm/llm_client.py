@@ -34,13 +34,13 @@ def _configure_gemini_sdk() -> None:
             logger.error(f"Error while configuring Generative AI SDK client: {e}")
             raise LLMError(f"Failed to configure Generative AI SDK credentials: {str(e)}")
 
-async def call_gemini(prompt: str, model_name: str = "gemini-1.5-flash", temperature: float = 0.2) -> str:
+async def call_gemini(prompt: str, model_name: str = "gemini-3.6-flash", temperature: float = 0.2) -> str:
     """
     Sends the compiled analysis prompt to the Google Gemini model asynchronously.
     
     Parameters:
     - prompt (str): The final, formatted prompt string containing dataset context, stats, and task instructions.
-    - model_name (str): The specific model ID to call (defaults to 'gemini-1.5-flash' for optimal balance of speed/quality).
+    - model_name (str): The specific model ID to call (defaults to 'gemini-3.6-flash' for optimal balance of speed/quality).
     - temperature (float): Sampling temperature (0.0 to 1.0) controlling variability (default 0.2 keeps responses logical).
 
     Returns:
