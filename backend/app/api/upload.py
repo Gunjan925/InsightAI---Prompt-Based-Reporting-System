@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, status
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.config.database import get_db
@@ -82,4 +82,20 @@ def get_user_datasets(db: Session = Depends(get_db), current_user: User = Depend
     Retrieve a list of all datasets previously uploaded by the authenticated user.
     """
     files = db.query(UploadedFile).filter(UploadedFile.user_id == current_user.id).order_by(UploadedFile.created_at.desc()).all()
-    return files
+    return files
+
+
+@router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_dataset(file_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Permanently delete an uploaded dataset by its ID.
+    Only the user who uploaded the file can delete it.
+    """
+    record = db.query(UploadedFile).filter(UploadedFile.id == file_id).first()
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dataset not found.")
+    if record.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this dataset.")
+    db.delete(record)
+    db.commit()
+    return

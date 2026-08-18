@@ -60,3 +60,36 @@ async def generate_dataset_dashboard(
     )
 
     return dashboard_data
+
+
+@router.get("/generate/{file_id}", status_code=status.HTTP_200_OK)
+async def get_dataset_dashboard(
+    file_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves the dataset file from MySQL by file_id (confirming ownership),
+    forwards it to the AI Service for cleaning, statistics, and Plotly chart generation (non-LLM),
+    and returns: { dataset_id, row_count, col_count, columns, charts[] }
+    """
+    # Fetch file record from MySQL and verify user ownership
+    db_file = db.query(UploadedFile).filter(
+        UploadedFile.id == file_id,
+        UploadedFile.user_id == current_user.id
+    ).first()
+
+    if not db_file:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dataset file not found or access denied."
+        )
+
+    # Call the AI Service's non-LLM dashboard endpoint
+    dashboard_data = await AiClient.generate_dashboard_from_ai_service(
+        filename=db_file.filename,
+        file_content=db_file.file_content,
+        mime_type=db_file.mime_type
+    )
+
+    return dashboard_data

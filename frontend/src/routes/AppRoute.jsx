@@ -27,6 +27,7 @@ import Upload   from '../pages/Upload'
 import Report   from '../pages/Report'
 import History  from '../pages/History'
 import Settings from '../pages/Settings'
+import DatasetDashboardPage from '../pages/DatasetDashboardPage'
 
 // ── Guard: require authentication ────────────────────────────────────────
 function ProtectedRoute({ children }) {
@@ -57,10 +58,12 @@ export default function AppRoute() {
       <Route path="/report/:id" element={<ProtectedRoute><Report /></ProtectedRoute>} />
       <Route path="/history"   element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/settings"  element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/dashboard/view/:fileId" element={<ProtectedRoute><DatasetDashboardPage /></ProtectedRoute>} />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+
   )
 }

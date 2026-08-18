@@ -61,6 +61,8 @@ def generate_plotly_chart(df: pd.DataFrame, config: dict) -> str:
             
             fig = px.line(agg_df, x=x_col, y=y_col, color_discrete_sequence=[PRIMARY_COLOR])
             fig.update_traces(line=dict(width=3), marker=dict(size=6, symbol="circle"))
+            layout_theme["xaxis"]["title"] = {"text": x_col, "font": {"size": 12, "color": "#6b7280"}}
+            layout_theme["yaxis"]["title"] = {"text": f"Average {y_col}", "font": {"size": 12, "color": "#6b7280"}}
 
         elif chart_type == "bar":
             x_col = config.get("x")
@@ -72,6 +74,8 @@ def generate_plotly_chart(df: pd.DataFrame, config: dict) -> str:
             
             fig = px.bar(agg_df, x=x_col, y=y_col, color_discrete_sequence=[PRIMARY_COLOR])
             fig.update_traces(marker_line_width=0, opacity=0.85)
+            layout_theme["xaxis"]["title"] = {"text": x_col, "font": {"size": 12, "color": "#6b7280"}}
+            layout_theme["yaxis"]["title"] = {"text": f"Average {y_col}", "font": {"size": 12, "color": "#6b7280"}}
 
         elif chart_type == "pie":
             cat_col = config.get("category")
@@ -81,17 +85,23 @@ def generate_plotly_chart(df: pd.DataFrame, config: dict) -> str:
             # Create interactive donut chart
             fig = px.pie(agg_df, names=cat_col, values="count", color_discrete_sequence=PALETTE, hole=0.4)
             fig.update_traces(textposition="inside", textinfo="percent+label")
+            # Pie charts have no axes — set annotation subtitle instead
+            layout_theme["annotations"] = [{"text": cat_col, "x": 0.5, "y": 0.5, "font_size": 13, "showarrow": False, "font_color": "#6b7280"}]
 
         elif chart_type == "scatter":
             x_col = config.get("x")
             y_col = config.get("y")
             fig = px.scatter(df, x=x_col, y=y_col, color_discrete_sequence=[SECONDARY_COLOR])
             fig.update_traces(marker=dict(size=8, opacity=0.75, line=dict(width=1, color="white")))
+            layout_theme["xaxis"]["title"] = {"text": x_col, "font": {"size": 12, "color": "#6b7280"}}
+            layout_theme["yaxis"]["title"] = {"text": y_col, "font": {"size": 12, "color": "#6b7280"}}
 
         elif chart_type == "histogram":
             x_col = config.get("x")
             fig = px.histogram(df, x=x_col, color_discrete_sequence=[PRIMARY_COLOR])
             fig.update_traces(marker_line_width=0.5, opacity=0.8)
+            layout_theme["xaxis"]["title"] = {"text": x_col, "font": {"size": 12, "color": "#6b7280"}}
+            layout_theme["yaxis"]["title"] = {"text": "Frequency (Count)", "font": {"size": 12, "color": "#6b7280"}}
 
         elif chart_type == "heatmap":
             numerical_df = df.select_dtypes(include=[np.number])
@@ -105,7 +115,10 @@ def generate_plotly_chart(df: pd.DataFrame, config: dict) -> str:
                     zmin=-1, zmax=1,
                     hoverongaps=False
                 ))
-                layout_theme["yaxis"]["tickangle"] = -45
+                layout_theme["xaxis"]["title"] = {"text": "Numeric Features", "font": {"size": 12, "color": "#6b7280"}}
+                layout_theme["yaxis"]["title"] = {"text": "Numeric Features", "font": {"size": 12, "color": "#6b7280"}}
+                layout_theme["xaxis"]["tickangle"] = -45
+                layout_theme["yaxis"]["tickangle"] = 0
             else:
                 fig = go.Figure()
 

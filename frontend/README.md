@@ -1,4 +1,4 @@
-# React + Vite
+<!-- # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
@@ -13,9 +13,7 @@ The React Compiler is not enabled on this template because of its impact on dev 
 
 ## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
-
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project. -->
 
 
 # InsightAI Frontend
@@ -59,7 +57,9 @@ The frontend communicates with the FastAPI backend through REST APIs and provide
 | React Router DOM | Client-side Routing      |
 | Axios            | HTTP Client              |
 | Tailwind CSS v4  | Styling                  |
-| Recharts         | Dashboard Charts         |
+| Recharts         | System Dashboard Charts  |
+| React Plotly.js  | Dataset Visual Dashboards|
+| Plotly.js        | Interactive Graph Engine |
 | Lucide React     | Icons                    |
 | React Hot Toast  | Notifications            |
 
@@ -102,6 +102,7 @@ frontend/
 │   ├── Register.jsx
 │   ├── Dashboard.jsx
 │   ├── Upload.jsx
+│   ├── DatasetDashboardPage.jsx
 │   ├── Report.jsx
 │   ├── History.jsx
 │   └── Settings.jsx
@@ -220,15 +221,16 @@ the session is automatically cleared and the user is redirected to Login.
 
 # Application Routes
 
-| Route       | Description           | Protected |
-| ----------- | --------------------- | --------- |
-| /login      | User Login            | No        |
-| /register   | User Registration     | No        |
-| /dashboard  | Dashboard Overview    | Yes       |
-| /upload     | Upload Dataset        | Yes       |
-| /report/:id | View Generated Report | Yes       |
-| /history    | View Previous Reports | Yes       |
-| /settings   | User Settings         | Yes       |
+| Route                     | Description                      | Protected |
+| ------------------------- | -------------------------------- | --------- |
+| /login                    | User Login                       | No        |
+| /register                 | User Registration                | No        |
+| /dashboard                | Dashboard Overview               | Yes       |
+| /upload                   | Upload Dataset & Prompts Wizard  | Yes       |
+| /dashboard/view/:fileId   | Full-Screen Side-by-Side Dashboard| Yes       |
+| /report/:id               | View Generated Report            | Yes       |
+| /history                  | View Previous Reports            | Yes       |
+| /settings                 | User Settings                    | Yes       |
 
 ---
 
@@ -484,9 +486,10 @@ Handles
 
 ## Upload
 
-| Method | Endpoint | Description    |
-| ------ | -------- | -------------- |
-| POST   | /upload  | Upload Dataset |
+| Method | Endpoint | Description                          |
+| ------ | -------- | ------------------------------------ |
+| POST   | /upload  | Upload Dataset                       |
+| GET    | /upload  | Fetch Previously Uploaded Datasets   |
 
 ---
 
@@ -502,9 +505,10 @@ Handles
 
 ## Dashboard
 
-| Method | Endpoint         | Description          |
-| ------ | ---------------- | -------------------- |
-| GET    | /dashboard/stats | Dashboard Statistics |
+| Method | Endpoint                    | Description                              |
+| ------ | --------------------------- | ---------------------------------------- |
+| GET    | /dashboard/stats            | Dashboard Statistics Overview            |
+| GET    | /dashboard/generate/{file_id}| Generate & Retrieve Visual Plotly Charts |
 
 ---
 
@@ -517,37 +521,39 @@ Handles
 
 ---
 
-# Upload Workflow
+# Upload Workflow (Two-Phase Flow)
 
 ```
-User Selects Dataset
+[Phase 1: Dataset Upload & Visual Insights]
+Select Dataset (Upload new CSV/Excel OR Select from Database History)
         │
         ▼
-File Validation
+Upload/Validate File ID
         │
         ▼
-Upload to Backend
+Click "Generate Visual Dashboard"
         │
         ▼
-Backend Stores File
+Launches Full Dashboard in a New Browser Tab (GET /api/dashboard/generate/:fileId)
+Renders Side-by-Side Plots (Bar, Scatter, Pie, Heatmap, Lines) Natively
+
+[Phase 2: Natural Language Report Generation]
+Go back to Upload Wizard Tab
         │
         ▼
-Returns File ID
+Enter Natural Language Prompt describing report context
         │
         ▼
-User Enters Prompt
+Click "Generate AI Report"
         │
         ▼
-Generate Report
+Backend triggers AI service RAG / Gemini analysis
         │
         ▼
-Backend Calls AI Service
+Generated Report Saved to MySQL
         │
         ▼
-Generated Report Saved
-        │
-        ▼
-Frontend Opens Report Page
+Redirect to /report/:id (Interactive HTML viewer)
 ```
 
 ---

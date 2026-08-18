@@ -20,6 +20,14 @@ export async function generateDashboard(fileId) {
   return res.data
 }
 
+// Phase 1 — Fetch dataset dashboard by ID (GET)
+// file_id: number
+// Returns: { dataset_id, row_count, col_count, columns, charts[] }
+export async function getDashboard(fileId) {
+  const res = await api.get(`/dashboard/generate/${fileId}`)
+  return res.data
+}
+
 // Phase 2 — Send a report generation request to the AI pipeline (uses Gemini LLM).
 // file_id: number  – ID returned by uploadDataset()
 // prompt:  string  – Natural language analysis instruction

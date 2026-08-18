@@ -73,14 +73,14 @@ LOG_LEVEL=INFO
 
 Start the application server using Uvicorn:
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+uvicorn app.main:app --port 8001 --reload
 ```
 
 * **Interactive Swagger Documentation**: Once the service is running, navigate to [http://localhost:8001/docs](http://localhost:8001/docs) in your browser to inspect and test all API endpoints interactively.
 
 ---
 
-## 4. Verifying Endpoints
+<!-- ## 4. Verifying Endpoints
 
 Below are commands to test and verify the endpoints from the console (using PowerShell or curl).
 
@@ -101,7 +101,8 @@ Verifies if the AI Service is online.
   ```
 
 ### Endpoint 2: Non-LLM Dashboard Processing (POST `/api/dashboard`)
-Accepts a dataset file upload and returns data cleaning status, statistics, and Plotly graph configurations.
+Accepts a dataset file upload and returns data cleaning status, descriptive statistics, and Plotly graph configurations. 
+*Note: This generates multiple charts (lines, bars, pies, scatters, heatmaps, histograms) by iterating over up to 3 variables per chart type for comprehensive dataset coverage.*
 
 * **PowerShell**:
   ```powershell
@@ -145,68 +146,19 @@ Called by the backend to compile a complete analytics report.
   {
       "report_title": "...",
       "summary": "...",
-      "content": "<!-- Beautiful HTML Content -->",
+      "content": "<p>content</p>",
       "statistics": { ... },
       "charts": [ ... ]
   }
   ```
 
-Complete workflow 
-CSV
+--- -->
 
-↓
+## 4. System Data Pipeline Workflows
 
-Pandas
-
-↓
-
-Statistics
-
-↓
-
-Embeddings
-
-↓
-
-ChromaDB
-
-↓
-
-User Prompt
-
-↓
-
-Retriever
-
-↓
-
-Relevant Rows
-
-↓
-
-Prompt Builder
-
-↓
-
-One Large Prompt
-
-↓
-
-Gemini
-
-↓
-
-Markdown Report
-
-↓
-
-HTML/PDF Generator
-
-
-
-
-
-CSV/Excel
+### Phase 1: Ingestion & Vector Indexing (RAG Prep)
+```
+CSV/Excel Upload
       │
       ▼
 Pandas DataFrame
@@ -215,13 +167,37 @@ Pandas DataFrame
 convert_dataframe_to_text_chunks()
       │
       ▼
-List of Text Chunks
+List of Text Chunks (row aggregates)
       │
       ▼
-Embedding Model
+Embedding Model (all-MiniLM-L6-v2)
       │
       ▼
-Vectors
+Vectors Store Index
       │
       ▼
-ChromaDB
+ChromaDB Collections
+```
+
+### Phase 2: User Prompt & LLM Generation
+```
+User Prompt (Natural Language Query)
+      │
+      ▼
+Retriever (ChromaDB similarity search)
+      │
+      ▼
+Retrieve Top Relevant Rows Context
+      │
+      ▼
+One Large Prompt (Template + Summary Stats + Context + Query)
+      │
+      ▼
+Google Gemini API
+      │
+      ▼
+Markdown Report Generation
+      │
+      ▼
+HTML / PDF Formatting & Save to DB
+```

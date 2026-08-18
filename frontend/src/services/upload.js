@@ -38,3 +38,9 @@ export async function getUploadedDatasets() {
   const res = await api.get('/upload')
   return res.data
 }
+
+// Delete a previously uploaded dataset by its ID.
+// Returns nothing on success (HTTP 204).
+export async function deleteDataset(fileId) {
+  await api.delete(`/upload/${fileId}`)
+}
