@@ -61,13 +61,17 @@ The user wants to analyze this dataset with the following focus:
 "{user_prompt}"
 
 ### SECTION 5: REPORT FORMATTING AND STRUCTURE RULES
-Please compile a comprehensive, data-driven report structured exactly as follows. Use standard Markdown syntax. Do NOT output HTML tags directly.
+Please compile a comprehensive, data-driven report structured strictly as follows. Use standard Markdown syntax. Do NOT output HTML tags directly.
+
+CRITICAL FORMATTING RULE:
+- Write ALL sections using clear, concise bullet-point pointers (`- **Lead Topic**: Key detail...`).
+- Avoid dense, text-heavy paragraphs. Ensure every finding, insight, and recommendation is broken down into structured bullet pointers so the report is highly scannable, visual, and user-friendly.
 
 1. **Title**: A professional and engaging report title. Use `# [Title]`
-2. **Executive Summary**: A concise 1-2 paragraph description summarizing the scope, main findings, and data characteristics. Use `## Executive Summary`
-3. **Detailed Analysis**: Address the user's request. Deep dive into the numbers, explain trends, cite specific row details from Section 3, and explain correlations. You are encouraged to present data in structured Markdown tables. Use `## Detailed Analysis`
-4. **Key Insights & Anomalies**: Bullet points outlining core take-aways, outliers, or intriguing patterns. Use `## Key Insights & Anomalies`
-5. **Recommendations**: 3-4 actionable business recommendations based on the findings. Use `## Strategic Recommendations`
+2. **Executive Summary**: 3-4 bullet-point pointers summarizing the scope, core numbers, and key takeaways. Use `## Executive Summary`
+3. **Detailed Analysis**: Address the user's prompt using structured bullet pointers (`- **Metric/Trend**: ...`) and structured Markdown comparison tables. Use `## Detailed Analysis`
+4. **Key Insights & Anomalies**: Concise bullet pointers outlining outliers, patterns, or key metrics. Use `## Key Insights & Anomalies`
+5. **Recommendations**: 3-4 actionable business recommendations formatted as bullet pointers (`- **Action Item**: ...`). Use `## Strategic Recommendations`
 
 Ensure the tone is analytical, executive-friendly, objective, and precise.
 """

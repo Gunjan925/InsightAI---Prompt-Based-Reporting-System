@@ -61,18 +61,19 @@ def markdown_to_html(md_text: str) -> str:
     html_text = re.sub(r'\*\*(.*?)\*\*', r'<strong class="font-bold text-indigo-950/90">\1</strong>', html_text)
     html_text = re.sub(r'\*(.*?)\*', r'<em class="italic text-gray-600">\1</em>', html_text)
 
-    # 5. Lists Conversion
+    # 5. Lists Conversion to User-Friendly Pointer Bullet Cards
     def parse_lists(match) -> str:
         items = match.group(1).strip().split("\n")
         li_items = []
         for it in items:
             cleaned_val = re.sub(r'^[\-\*\+]\s+', '', it).strip()
-            li_items.append(f"<li class='text-gray-700 leading-relaxed text-sm py-1'>{cleaned_val}</li>")
-        return f"<ul class='my-4 space-y-1 list-disc pl-5 text-gray-600'>{''.join(li_items)}</ul>"
+            if cleaned_val:
+                li_items.append(f"<li>{cleaned_val}</li>")
+        return f"<ul class='pointer-list'>{''.join(li_items)}</ul>"
 
     html_text = re.sub(r'((?:^[\-\*\+]\s+[^\n]+\r?\n?)+)', parse_lists, html_text, flags=re.MULTILINE)
 
-    # 6. Break down block groupings into paragraphs
+    # 6. Break down block groupings into user-friendly pointer cards
     content_blocks = []
     for chunk in html_text.split("\n\n"):
         chunk = chunk.strip()
@@ -82,8 +83,8 @@ def markdown_to_html(md_text: str) -> str:
         if chunk.startswith("<h") or chunk.startswith("<ul") or chunk.startswith("<div") or chunk.startswith("<pre") or chunk.startswith("<table"):
             content_blocks.append(chunk)
         else:
-            # Wrap as a clean text paragraph
-            content_blocks.append(f"<p class='text-gray-700 leading-relaxed text-base mb-4'>{chunk}</p>")
+            # Wrap standard paragraphs into a clean pointer callout item
+            content_blocks.append(f"<ul class='pointer-list'><li>{chunk}</li></ul>")
 
     return "\n".join(content_blocks)
 

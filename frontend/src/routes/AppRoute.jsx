@@ -28,6 +28,7 @@ import Report   from '../pages/Report'
 import History  from '../pages/History'
 import Settings from '../pages/Settings'
 import DatasetDashboardPage from '../pages/DatasetDashboardPage'
+import ChatPage from '../pages/ChatPage'
 
 // ── Guard: require authentication ────────────────────────────────────────
 function ProtectedRoute({ children }) {
@@ -55,6 +56,7 @@ export default function AppRoute() {
       {/* Protected routes */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/upload"    element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+      <Route path="/chat"      element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
       <Route path="/report/:id" element={<ProtectedRoute><Report /></ProtectedRoute>} />
       <Route path="/history"   element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/settings"  element={<ProtectedRoute><Settings /></ProtectedRoute>} />

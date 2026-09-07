@@ -110,3 +110,45 @@ class AiClient:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error contacting AI Service for dashboard: {str(e)}"
             )
+
+    @staticmethod
+    async def ask_chat_ai_service(dataset_id: str, query: str) -> dict:
+        """
+        Forwards a chat query to the AI Service's /api/chat endpoint.
+        Returns: { response, retrieved_context }
+        """
+        url = f"{settings.AI_SERVICE_URL.rstrip('/')}/api/chat"
+        logger.info(f"Forwarding chat QA query for '{dataset_id}' to AI Service at: {url}")
+
+        payload = {
+            "dataset_id": dataset_id,
+            "query": query,
+            "top_k": 8
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                response = await client.post(url, json=payload)
+
+            if response.status_code != 200:
+                logger.error(f"AI Service chat error: {response.status_code} - {response.text}")
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=f"AI Service chat error: {response.text}"
+                )
+
+            return response.json()
+
+        except httpx.ConnectError as ce:
+            logger.error(f"Could not connect to AI Service for chat at {url}: {ce}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Connection to AI Service failed. Please ensure the AI service is online and running."
+            )
+        except Exception as e:
+            logger.error(f"Unhandled error during AI service chat call: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error contacting AI Service for chat: {str(e)}"
+            )
+

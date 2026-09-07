@@ -19,6 +19,7 @@ import toast from 'react-hot-toast'
 import {
   LayoutDashboard,
   Upload,
+  MessageSquare,
   History,
   Settings,
   LogOut,
@@ -29,6 +30,7 @@ import {
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/upload',    icon: Upload,          label: 'Upload & Generate' },
+  { to: '/chat',      icon: MessageSquare,   label: 'Chat QA' },
   { to: '/history',   icon: History,         label: 'History' },
   { to: '/settings',  icon: Settings,        label: 'Settings' },
 ]

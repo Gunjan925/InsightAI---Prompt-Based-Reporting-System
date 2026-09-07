@@ -18,7 +18,6 @@ import { useNavigate }         from 'react-router-dom'
 import Layout                  from '../components/Layout'
 import UploadButton            from '../components/upload/UploadButton'
 import UploadProgress          from '../components/upload/UploadProgress'
-import PromptInput             from '../components/PromptInput'
 import Loader                  from '../components/Loader'
 import { uploadDataset, getUploadedDatasets, deleteDataset } from '../services/upload'
 import { generateReport }      from '../services/report'
@@ -32,22 +31,8 @@ import toast from 'react-hot-toast'
 const STEPS = [
   { label: 'Upload Dataset'   },
   { label: 'View Dashboard'   },
-  { label: 'Enter Prompt'     },
-  { label: 'Generate Report'  },
+  { label: 'AI Options (Report & Chat)' },
 ]
-
-// Heuristic: reject prompts that are clearly not dataset-specific
-// Blocks single generic words like "hi", "hello", "what", "tell me" with no context
-const GENERIC_PROMPTS = ['hi', 'hello', 'hey', 'what', 'who', 'why', 'yes', 'no', 'ok', 'okay', 'test', 'testing']
-
-function isPromptDatasetRelevant(text) {
-  const trimmed = text.trim().toLowerCase()
-  // Too short
-  if (trimmed.length < 10) return false
-  // Exact match to a generic word
-  if (GENERIC_PROMPTS.includes(trimmed)) return false
-  return true
-}
 
 export default function Upload() {
   const navigate = useNavigate()
@@ -63,24 +48,15 @@ export default function Upload() {
   const [showPrev,       setShowPrev]       = useState(false)
   const [loadingPrev,    setLoadingPrev]    = useState(false)
 
-  // ── Report generation state (Phase 2) ───────────────────────────────────
-  const [prompt,         setPrompt]         = useState('')
+  // ── Report generation state ──────────────────────────────────────────────
   const [generating,     setGenerating]     = useState(false)
   const [genError,       setGenError]       = useState('')
 
   // ── Derived flags ────────────────────────────────────────────────────────
-  // isUploaded: a dataset has been selected (freshly uploaded or chosen from history)
   const isUploaded = uploadStatus === 'done' && fileId !== null
-  // canGenerate: dataset selected + prompt is long enough + not currently generating
-  const canGenerate = isUploaded && isPromptDatasetRelevant(prompt) && !generating
-  // prompt validation message
-  const promptTooShort = prompt.trim().length > 0 && !isPromptDatasetRelevant(prompt)
 
   // Current active step index (0-based) for the progress bar
-  const activeStep = !isUploaded   ? 0
-    : prompt.trim().length === 0   ? 1   // uploaded, waiting for dashboard visit / prompt entry
-    : !generating                  ? 2   // prompt entered
-    :                                3   // generating
+  const activeStep = !isUploaded ? 0 : generating ? 2 : 1
 
   // ── Restore state from sessionStorage when returning via Back button ─────
   useEffect(() => {
@@ -102,7 +78,6 @@ export default function Upload() {
     setUploadStatus('uploading')
     setFileId(null)
     setGenError('')
-    setPrompt('')
     setShowPrev(false)
 
     try {
@@ -136,7 +111,6 @@ export default function Upload() {
     setFile({ name: dataset.filename, size: dataset.file_size })
     setFileId(dataset.id)
     setUploadStatus('done')
-    setPrompt('')
     setGenError('')
     setShowPrev(false)
     toast.success(`Selected dataset: "${dataset.filename}"`)
@@ -166,14 +140,16 @@ export default function Upload() {
     }
   }
 
-  // ── Step 4: Generate Full AI Report (Phase 2, Gemini LLM) ───────────────
+  // ── Step 3: Generate Full AI Report (No prompt required) ─────────────
   async function handleGenerateReport() {
-    if (!canGenerate) return
+    if (!isUploaded || generating) return
     setGenerating(true)
     setGenError('')
 
+    const defaultPrompt = 'Generate a complete, structured executive business intelligence analysis report for this dataset detailing key metrics, trends, anomalies, and strategic recommendations.'
+
     try {
-      const report = await generateReport(fileId, prompt.trim())
+      const report = await generateReport(fileId, defaultPrompt)
       toast.success('Report generated successfully!')
       navigate(`/report/${report.id}`)
     } catch (err) {
@@ -199,7 +175,6 @@ export default function Upload() {
     setUploadStatus('idle')
     setFileId(null)
     setShowPrev(false)
-    setPrompt('')
     setGenError('')
     setGenerating(false)
   }
@@ -388,96 +363,120 @@ export default function Upload() {
             </button>
           </div>
 
-          {/* ── STEP 3 & 4: Prompt + Generate Report (Phase 2) ────────────── */}
+          {/* ── STEP 3 & 4: Separate AI Actions — Report Generation & Interactive Chat ── */}
           <div
             className="glass-card"
             style={{
               padding: '24px',
-              // Enabled as soon as a dataset is uploaded — no longer gated on hasDashboard
               opacity: isUploaded ? 1 : 0.45,
               pointerEvents: isUploaded ? 'auto' : 'none',
               transition: 'opacity 0.3s ease',
             }}
           >
-            <div className="section-title" style={{ marginBottom: 6 }}>Step 3 &amp; 4 — AI Report Generation</div>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-              Describe the analysis you need. Your prompt must be specific to the uploaded dataset.
+            <div className="section-title" style={{ marginBottom: 6 }}>Step 3 — AI Intelligence Options</div>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: 20 }}>
+              Choose between automated 2-column executive report generation or interactive chatbot QA for your dataset.
             </p>
 
-            {/* Dataset-specific prompt hint */}
-            <div style={{
-              display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14,
-              padding: '10px 14px', borderRadius: 10,
-              background: 'var(--primary-light, rgba(99,102,241,0.08))',
-              border: '1px solid var(--border)',
-              fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.6,
-            }}>
-              <Info size={14} style={{ flexShrink: 0, marginTop: 2, color: 'var(--primary)' }} />
-              <span>
-                Your prompt should reference this dataset specifically —
-                e.g. <em>"Summarise the monthly sales trends and identify the top 3 performing regions"</em> or
-                <em> "Find anomalies in the revenue column and explain possible causes."</em>
-              </span>
+            {/* Two Action Cards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
+
+              {/* Action 1: Instant Report Generation (No Prompt Required) */}
+              <div
+                style={{
+                  background: 'var(--bg-elevated)',
+                  border: '1.5px solid var(--border-light)',
+                  borderRadius: 14,
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justify: 'space-between',
+                  gap: 16
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Sparkles size={18} color="var(--primary)" />
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                      Generate AI Report
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    Generate a complete executive analysis report without typing any prompt. Includes 2-column Plotly graphs, statistical breakdown, and structured pointer insights.
+                  </p>
+                </div>
+
+                {generating ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
+                    <Loader size="sm" />
+                    <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)' }}>Generating report...</span>
+                  </div>
+                ) : (
+                  <button
+                    id="generate-report-btn"
+                    onClick={() => handleGenerateReport()}
+                    disabled={!isUploaded || generating}
+                    className="btn-primary"
+                    style={{ width: '100%', padding: '11px 18px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                  >
+                    <Sparkles size={16} />
+                    Generate Report
+                    <ArrowRight size={15} />
+                  </button>
+                )}
+              </div>
+
+              {/* Action 2: Interactive Chatbot Dashboard */}
+              <div
+                style={{
+                  background: 'var(--bg-elevated)',
+                  border: '1.5px solid var(--border-light)',
+                  borderRadius: 14,
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justify: 'space-between',
+                  gap: 16
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--secondary-light, rgba(6,182,212,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Database size={18} color="var(--secondary)" />
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                      Dataset Chatbot QA
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    Open the dedicated chatbot interface to ask specific questions about this dataset. All chat sessions are saved per document.
+                  </p>
+                </div>
+
+                <button
+                  id="open-chat-btn"
+                  onClick={() => navigate(`/chat?fileId=${fileId}`)}
+                  disabled={!isUploaded}
+                  className="btn-secondary"
+                  style={{ width: '100%', padding: '11px 18px', fontSize: '0.88rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                >
+                  <Database size={16} />
+                  Open Chat Dashboard
+                  <ArrowRight size={15} />
+                </button>
+              </div>
+
             </div>
 
-            {/* Prompt input (Step 3) */}
-            <PromptInput
-              value={prompt}
-              onChange={setPrompt}
-              disabled={!isUploaded || generating}
-              placeholder="e.g. Analyse the sales trends by region and highlight peak months in the dataset…"
-            />
-
-            {/* Prompt validation feedback */}
-            {promptTooShort && (
-              <p style={{ marginTop: 8, fontSize: '0.78rem', color: 'var(--warning, #f59e0b)' }}>
-                Please enter a more specific, dataset-related prompt (minimum 10 characters).
-              </p>
-            )}
-
-            {/* Error alert */}
+            {/* Error alert if report generation fails */}
             {genError && (
               <div className="alert alert-error" style={{ margin: '16px 0 0' }}>
                 <AlertCircle size={16} style={{ flexShrink: 0 }} />
                 <span>{genError}</span>
               </div>
             )}
-
-            {/* Generate Report button / spinner (Step 4) */}
-            <div style={{ marginTop: 20 }}>
-              {generating ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '12px 0' }}>
-                  <div style={{
-                    width: 52, height: 52, borderRadius: 14,
-                    background: 'var(--primary-light)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Sparkles size={24} color="var(--primary)" />
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
-                      AI is generating your report…
-                    </div>
-                    <div style={{ marginTop: 5, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      This may take 30–120 seconds. Please do not close this tab.
-                    </div>
-                  </div>
-                  <Loader size="md" />
-                </div>
-              ) : (
-                <button
-                  id="generate-report-btn"
-                  onClick={handleGenerateReport}
-                  disabled={!canGenerate}
-                  className="btn-primary"
-                  style={{ padding: '12px 28px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8 }}
-                >
-                  <Sparkles size={18} />
-                  Generate AI Report
-                  <ArrowRight size={16} />
-                </button>
-              )}
-            </div>
           </div>
 
         </div>

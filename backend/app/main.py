@@ -10,12 +10,14 @@ from app.api.upload import router as upload_router
 from app.api.report import router as report_router
 from app.api.history import router as history_router
 from app.api.dashboard import router as dashboard_router
+from app.api.chat import router as chat_router
 
 # Import all models to ensure they are registered on the Base metadata before table creation
 from app.models.user import User
 from app.models.uploaded_file import UploadedFile
 from app.models.report import Report
 from app.models.blacklisted_token import BlacklistedToken
+from app.models.chat_session import ChatSession, ChatMessage
 
 # Defines the application's lifespan.
 
@@ -57,6 +59,7 @@ app.include_router(upload_router, prefix="/api")
 app.include_router(report_router, prefix="/api")
 app.include_router(history_router, prefix="/api")
 app.include_router(dashboard_router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 @app.get("/health", tags=["Health Check"])
 def read_root():

@@ -105,9 +105,9 @@ export default function DatasetDashboard({ data }) {
         </div>
       )}
 
-      {/* ── Plotly Charts (Native React-Plotly) ─────────────────────── */}
+      {/* ── Plotly Charts (Native React-Plotly in 2-Column Grid) ──────── */}
       {charts.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 20 }}>
           {charts.map((chart, idx) => {
             let figure;
             try {
@@ -127,7 +127,7 @@ export default function DatasetDashboard({ data }) {
               <div
                 key={idx}
                 className="glass-card"
-                style={{ padding: '20px 24px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+                style={{ padding: '20px 24px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
               >
                 {/* Chart title and description */}
                 <div style={{ marginBottom: 12 }}>
@@ -142,7 +142,7 @@ export default function DatasetDashboard({ data }) {
                 </div>
 
                 {/* React-Plotly Component */}
-                <div style={{ width: '100%', height: 400 }}>
+                <div style={{ width: '100%', height: 340 }}>
                   <Plot
                     data={figure.data}
                     layout={{
@@ -150,7 +150,7 @@ export default function DatasetDashboard({ data }) {
                       autosize: true,
                       paper_bgcolor: 'rgba(0,0,0,0)',
                       plot_bgcolor: 'rgba(0,0,0,0)',
-                      margin: { l: 48, r: 24, t: 48, b: 48 },
+                      margin: { l: 48, r: 24, t: 40, b: 48 },
                     }}
                     useResizeHandler={true}
                     style={{ width: '100%', height: '100%' }}

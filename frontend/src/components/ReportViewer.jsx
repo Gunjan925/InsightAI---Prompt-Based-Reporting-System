@@ -22,10 +22,17 @@ import { downloadReport } from '../services/report'
 import toast from 'react-hot-toast'
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleString('en-IN', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
+  const utcDate = new Date(iso.replace(' ', 'T') + 'Z');
+
+  return utcDate.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }) + ' IST';
 }
 
 export default function ReportViewer({ report }) {
@@ -189,7 +196,8 @@ export default function ReportViewer({ report }) {
           sandbox="allow-scripts allow-same-origin"
           style={{
             width: '100%',
-            height: '70vh',
+            height: '85vh',
+            minHeight: 700,
             border: 'none',
             display: 'block',
             background: '#fff',
